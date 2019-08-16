@@ -13,3 +13,16 @@
 #  1. pip install requests - установить пакет
 #  2. import requests - подключить в файле .py
 #
+import requests
+
+respons = requests.get("https://jsonplaceholder.typicode.com/users")
+user_list = (respons.json())
+# user_list[0]['name']
+
+
+
+post_respons = requests.post("https://jsonplaceholder.typicode.com/users", {'name': 'Andy'})
+
+print(post_respons.json())
+
+
