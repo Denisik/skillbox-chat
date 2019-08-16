@@ -17,17 +17,17 @@ class User(Protocol):
     def connectionMade(self):
         """Обработчик успешного соединения (посылаем логин на сервер)"""
 
-        pass
+        self.send_message(f"login:{self.factory.login}")
 
     def dataReceived(self, data: bytes):
         """Обработчик нового сообщения от сервера"""
 
-        pass
+        print(data.decode())
 
     def send_message(self, content: str):
         """Обаботчик отправки сообщения на сервер"""
-
-        pass
+        content = f"{content}\n"
+        self.transport.write(content.encode())
 
 
 class Connector(ClientFactory):
@@ -40,7 +40,7 @@ class Connector(ClientFactory):
 
     def __init__(self, login: str):
         """Создание менеджера подключений (сохраняем логин)"""
-
+        self.login = login
         pass
 
     def startedConnecting(self, connector):
@@ -50,12 +50,12 @@ class Connector(ClientFactory):
 
     def clientConnectionFailed(self, connector, reason):
         """Обработчик неудачного соединения (отключаем reactor)"""
-
+        reactor.callFromThread(reactor.stop)
         pass
 
     def clientConnectionLost(self, connector, reason):
         """Обработчик отключения соединения (отключаем reactor)"""
-
+        reactor.callFromThread(reactor.stop)
         pass
 
 

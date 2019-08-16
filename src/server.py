@@ -28,8 +28,10 @@ class Client(LineOnlyReceiver):
         - внести в список клиентов
         - отправить сообщение приветствия
         """
+        self.ip = self.transport.getPeer().host
+        self.factory.clients.append(self)
 
-        pass
+        self.sendLine("Welcome!".encode())
 
     def connectionLost(self, reason=connectionDone):
         """
@@ -39,7 +41,9 @@ class Client(LineOnlyReceiver):
         - вывести сообщение в чат об отключении
         """
 
-        pass
+        self.factory.clients.remove(self)
+        print(f"Client disconnected: {self.ip}")
+
 
     def lineReceived(self, line: bytes):
         """
@@ -48,8 +52,17 @@ class Client(LineOnlyReceiver):
         - зарегистрировать, если это первый вход, уведомить чат
         - переслать сообщение в чат, если уже зарегистрирован
         """
+        message = line.decode()
 
-        pass
+        if self.login is None:
+            # login:admin
+            if message.startswith("login:"):
+                self.login = message.replace("login:", "")
+                notification = f"New client with login: {self.login}"
+                print(notification)
+                self.factory.notify_all_users(notification)
+        else:
+            self.factory.notify_all_users(message)
 
 
 class Server(ServerFactory):
@@ -65,13 +78,13 @@ class Server(ServerFactory):
         - инициализация списка клиентов
         - вывод уведомления в консоль
         """
-
-        pass
+        self.clients = []
+        print("Server started - OK")
 
     def startFactory(self):
         """Запуск прослушивания клиентов (уведомление в консоль)"""
 
-        pass
+        print("Listening ...")
 
     def notify_all_users(self, message: str):
         """
@@ -79,7 +92,9 @@ class Server(ServerFactory):
         :param message: Текст сообщения
         """
 
-        pass
+        for user in self.clients:
+            user.sendLine(message.encode())
+
 
 
 if __name__ == '__main__':
